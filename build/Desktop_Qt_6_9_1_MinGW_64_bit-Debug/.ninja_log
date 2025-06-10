@@ -1,0 +1,8 @@
+# ninja log v6
+2	149	7712968486268166	CMakeFiles/ForestSurvivalSimulator.dir/src/Game.cpp.obj	26a932d8462a8895
+11	568	7712969355197809	CMakeFiles/ForestSurvivalSimulator.dir/src/MenuState.cpp.obj	63b15328bc35d032
+19	150	7712968486430422	CMakeFiles/ForestSurvivalSimulator.dir/src/State.cpp.obj	75fce60c2812372a
+22	154	7712968486465979	CMakeFiles/ForestSurvivalSimulator.dir/src/Utils.cpp.obj	6950aefcc20f2201
+24	508	7712969355329618	CMakeFiles/ForestSurvivalSimulator.dir/src/main.cpp.obj	dc004b0380741784
+568	725	7712969360776817	ForestSurvivalSimulator.exe	6115b9c0ae105732
+2	285	7712972165003899	build.ninja	e2ad68b4e94ea4d3
