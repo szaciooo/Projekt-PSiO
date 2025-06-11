@@ -2,7 +2,7 @@
 #include "MenuState.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Forest Survival Simulator");
+    sf::RenderWindow window(sf::VideoMode(1536, 1024), "Forest Survival Simulator");
     window.setFramerateLimit(60);
 
     MenuState menu(window);

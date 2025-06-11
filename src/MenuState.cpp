@@ -1,23 +1,30 @@
 #include "MenuState.h"
 
 MenuState::MenuState(sf::RenderWindow& window) : window(window) {
-    font.loadFromFile("assets/fonts/OpenSans.ttf");
+    backgroundTexture.loadFromFile("assets/backgrounds/menu_bg1.png");
+    backgroundSprite.setTexture(backgroundTexture);
 
-    titleText.setFont(font);
-    titleText.setString("Forest Survival Simulator");
-    titleText.setCharacterSize(36);
-    titleText.setFillColor(sf::Color::Green);
-    titleText.setPosition(100, 50);
+    sf::Texture temp;
 
-    std::vector<std::string> labels = {"Start", "Jak grać", "Wyniki"};
-    for (size_t i = 0; i < labels.size(); ++i) {
-        sf::Text button;
-        button.setFont(font);
-        button.setString(labels[i]);
-        button.setCharacterSize(28);
-        button.setFillColor(sf::Color::White);
-        button.setPosition(100, 150 + static_cast<float>(i) * 60);
-        buttons.push_back(button);
+    temp.loadFromFile("assets/ui/button_start.png");
+    buttonTexturesIdle.push_back(temp);
+    temp.loadFromFile("assets/ui/button_start_hover.png");
+    buttonTexturesHover.push_back(temp);
+
+    temp.loadFromFile("assets/ui/button_howtoplay.png");
+    buttonTexturesIdle.push_back(temp);
+    temp.loadFromFile("assets/ui/button_howtoplay_hover.png");
+    buttonTexturesHover.push_back(temp);
+
+    sf::Vector2f buttonSize(300.f, 100.f);
+    float buttonX = (1536 - 300) / 2.f; // = 618
+    std::vector<float> buttonYs = {580.f, 680.f};
+
+    for (size_t i = 0; i < 2; ++i) {
+        sf::RectangleShape button(buttonSize);
+        button.setPosition(buttonX, buttonYs[i]);
+        button.setTexture(&buttonTexturesIdle[i]);
+        buttonShapes.push_back(button);
     }
 }
 
@@ -30,36 +37,34 @@ void MenuState::handleEvents() {
             updateButtonStates();
         } else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
             if (hoveredButton == 0) {
-                // Start Game
+                // Start
             } else if (hoveredButton == 1) {
-                // Show Instructions
-            } else if (hoveredButton == 2) {
-                // Show High Scores
+                // Jak grać
             }
         }
     }
 }
 
 void MenuState::update() {
-    // Tu można dodać animacje, efekty itp.
+    // animacje
 }
 
 void MenuState::render() {
-    window.draw(titleText);
-    for (auto& button : buttons) {
+    window.draw(backgroundSprite);
+    for (const auto& button : buttonShapes) {
         window.draw(button);
     }
 }
 
 void MenuState::updateButtonStates() {
     hoveredButton = -1;
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        auto bounds = buttons[i].getGlobalBounds();
+    for (size_t i = 0; i < buttonShapes.size(); ++i) {
+        auto bounds = buttonShapes[i].getGlobalBounds();
         if (bounds.contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) {
-            buttons[i].setFillColor(sf::Color::Yellow);
+            buttonShapes[i].setTexture(&buttonTexturesHover[i]);
             hoveredButton = static_cast<int>(i);
         } else {
-            buttons[i].setFillColor(sf::Color::White);
+            buttonShapes[i].setTexture(&buttonTexturesIdle[i]);
         }
     }
 }

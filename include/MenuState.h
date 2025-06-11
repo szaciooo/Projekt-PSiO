@@ -11,9 +11,13 @@ public:
 
 private:
     sf::RenderWindow& window;
-    sf::Font font;
-    sf::Text titleText;
-    std::vector<sf::Text> buttons; // "Start", "Jak grać", "Wyniki"
+
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
+
+    std::vector<sf::RectangleShape> buttonShapes;
+    std::vector<sf::Texture> buttonTexturesIdle;
+    std::vector<sf::Texture> buttonTexturesHover;
 
     int hoveredButton = -1;
     void updateButtonStates();
