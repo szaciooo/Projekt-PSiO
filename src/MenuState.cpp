@@ -17,7 +17,7 @@ MenuState::MenuState(sf::RenderWindow& window) : window(window) {
     buttonTexturesHover.push_back(temp);
 
     sf::Vector2f buttonSize(300.f, 100.f);
-    float buttonX = (1536 - 300) / 2.f; // = 618
+    float buttonX = (1536 - 300) / 2.f;
     std::vector<float> buttonYs = {580.f, 680.f};
 
     for (size_t i = 0; i < 2; ++i) {
@@ -37,16 +37,16 @@ void MenuState::handleEvents() {
             updateButtonStates();
         } else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
             if (hoveredButton == 0) {
-                // Start
+                startGame = true;
             } else if (hoveredButton == 1) {
-                // Jak grać
+                showInstructions = true;
             }
         }
     }
 }
 
 void MenuState::update() {
-    // animacje
+    // tu można dodać animacje
 }
 
 void MenuState::render() {
@@ -67,4 +67,17 @@ void MenuState::updateButtonStates() {
             buttonShapes[i].setTexture(&buttonTexturesIdle[i]);
         }
     }
+}
+
+bool MenuState::shouldStartGame() const {
+    return startGame;
+}
+
+bool MenuState::shouldShowInstructions() const {
+    return showInstructions;
+}
+
+void MenuState::resetState() {
+    startGame = false;
+    showInstructions = false;
 }
