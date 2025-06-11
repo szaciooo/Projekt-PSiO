@@ -83,7 +83,9 @@
 				2,
 				3,
 				4,
-				5
+				5,
+				6,
+				7
 			]
 		}
 	],
@@ -140,19 +142,21 @@
 				2,
 				3,
 				4,
-				5
+				5,
+				6,
+				7
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
-				6,
-				7,
 				8,
 				9,
 				10,
-				11
+				11,
+				12,
+				13
 			]
 		}
 	],
@@ -180,6 +184,18 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "src/Player.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/PlayerStats.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/SkeletonEnemy.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

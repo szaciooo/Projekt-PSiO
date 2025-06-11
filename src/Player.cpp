@@ -1,15 +1,18 @@
-// Player.cpp
 #include "Player.h"
 #include <iostream>
+#include <algorithm>
 
 Player::Player() {
     position = sf::Vector2f(700.f, 500.f);
     loadTextures();
+
     sprite.setTexture(walkTexture);
     sprite.setTextureRect(sf::IntRect(0, 0, 64, 64));
     sprite.setPosition(position);
+
     weaponSprite.setTexture(weaponTexture);
     weaponSprite.setTextureRect(sf::IntRect(0, 0, 64, 64));
+    weaponSprite.setPosition(position);
 }
 
 void Player::loadTextures() {
@@ -29,39 +32,47 @@ void Player::loadTextures() {
 
 void Player::handleInput() {
     velocity = {0.f, 0.f};
-    isMoving = false;
-    isAttacking = false;
+    moving = false;
+    attacking = false;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
         velocity.x -= speed;
         direction = Left;
-        isMoving = true;
+        moving = true;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
         velocity.x += speed;
-        direction = Up;
-        isMoving = true;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        velocity.y += speed;
         direction = Right;
-        isMoving = true;
+        moving = true;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
         velocity.y -= speed;
-        direction = Down;
-        isMoving = true;
+        direction = Up;
+        moving = true;
     }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        velocity.y += speed;
+        direction = Down;
+        moving = true;
+    }
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        isAttacking = true;
+        attacking = true;
     }
 }
 
 void Player::update(float deltaTime) {
     handleInput();
+
     position += velocity * deltaTime;
+
+    // blokada wyjścia poza ekran
+    position.x = std::clamp(position.x, 0.f, 1536.f - 64.f);
+    position.y = std::clamp(position.y, 0.f, 1024.f - 64.f);
+
     sprite.setPosition(position);
     weaponSprite.setPosition(position);
+
     updateAnimation();
 }
 
@@ -79,11 +90,11 @@ void Player::updateAnimation() {
     case Up:    row = 3; break;
     }
 
-    if (isAttacking) {
+    if (attacking) {
         sprite.setTexture(bodyWeaponTexture);
-        weaponSprite.setTextureRect(sf::IntRect(currentFrame * 64, row * 64, 64, 64));
         sprite.setTextureRect(sf::IntRect(currentFrame * 64, row * 64, 64, 64));
-    } else if (isMoving) {
+        weaponSprite.setTextureRect(sf::IntRect(currentFrame * 64, row * 64, 64, 64));
+    } else if (moving) {
         sprite.setTexture(walkTexture);
         sprite.setTextureRect(sf::IntRect(currentFrame * 64, row * 64, 64, 64));
     } else {
@@ -94,7 +105,47 @@ void Player::updateAnimation() {
 
 void Player::render(sf::RenderWindow& window) {
     window.draw(sprite);
-    if (isAttacking) {
+    if (attacking)
         window.draw(weaponSprite);
-    }
+}
+
+// --- Public helpers ---
+
+sf::FloatRect Player::getBounds() const {
+    return sprite.getGlobalBounds();
+}
+
+sf::FloatRect Player::getAttackBounds() const {
+    sf::FloatRect bounds = sprite.getGlobalBounds();
+    bounds.width += 10;
+    bounds.height += 10;
+    bounds.left -= 5;
+    bounds.top -= 5;
+    return bounds;
+}
+
+sf::Vector2f Player::getPosition() const {
+    return position;
+}
+
+bool Player::isAttacking() const {
+    return attacking;
+}
+
+float Player::getHealth() const {
+    return currentHealth;
+}
+
+float Player::getAttackStrength() const {
+    return attackPower;
+}
+
+void Player::takeDamage(float dmg) {
+    currentHealth -= dmg;
+    if (currentHealth < 0.f)
+        currentHealth = 0.f;
+}
+
+void Player::heal(float h) {
+    currentHealth = std::min(currentHealth + h, 100.f);
 }
