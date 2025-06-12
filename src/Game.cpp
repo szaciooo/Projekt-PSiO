@@ -105,7 +105,7 @@ void Game::update() {
 
     // Regeneracja życia co 3 sekundy
     if (lastRegenTime.getElapsedTime().asSeconds() > 3.f) {
-        player.heal(1.f);
+        player.heal(2.f);
         lastRegenTime.restart();
     }
 

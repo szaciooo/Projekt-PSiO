@@ -17,7 +17,7 @@ void SkeletonEnemy::update(float deltaTime, sf::Vector2f playerPos) {
     float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     if (length != 0) direction /= length;
 
-    float speed = 40.f;
+    float speed = 70.f;
     position += direction * speed * deltaTime;
     sprite.setPosition(position);
     updateAnimation();
