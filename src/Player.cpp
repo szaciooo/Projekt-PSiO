@@ -45,17 +45,17 @@ void Player::handleInput() {
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
         velocity.x += speed;
-        direction = Right;
+        direction = Up;
         moving = true;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
         velocity.y -= speed;
-        direction = Up;
+        direction = Down;
         moving = true;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
         velocity.y += speed;
-        direction = Down;
+        direction = Right;
         moving = true;
     }
 

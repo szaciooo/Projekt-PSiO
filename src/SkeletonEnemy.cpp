@@ -63,9 +63,9 @@ void SkeletonEnemy::updateAnimation() {
 
     int row = 0;
     if (std::abs(direction.y) > std::abs(direction.x)) {
-        row = (direction.y > 0) ? 0 : 3; // Down : Up
+        row = (direction.y > 0) ? 2 : 0; // Down : Up
     } else {
-        row = (direction.x > 0) ? 2 : 1; // Right : Left
+        row = (direction.x > 0) ? 3 : 1; // Right : Left
     }
 
     sprite.setTexture(walkTexture);
