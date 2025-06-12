@@ -48,7 +48,14 @@ int main() {
         }
 
         case State::GAME:
-            game.handleEvents();
+            bool backToMenu = false;
+            game.handleEvents(backToMenu);
+            if (backToMenu) {
+                currentState = State::MENU;
+                menu.resetState();
+                break;
+            }
+
             game.update();
             window.clear();
             game.render();

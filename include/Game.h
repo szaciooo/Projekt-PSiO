@@ -1,4 +1,3 @@
-// Game.h
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -9,7 +8,7 @@ class Game {
 public:
     Game(sf::RenderWindow& window);
 
-    void handleEvents();
+    void handleEvents(bool& backToMenu);
     void update();
     void render();
 
@@ -27,7 +26,15 @@ private:
     sf::Clock lastRegenTime;
     bool showStats = false;
 
+    enum GameState { Playing, Won, Lost } state = Playing;
+
+    sf::Text endText;
+    sf::Text xText;
+    sf::RectangleShape xHitbox;
+    bool xHovered = false;
+
     void spawnWave();
     void drawUI();
     void drawHealthBar(sf::Vector2f pos, float hp, float maxHp);
+    void updateXHover();
 };

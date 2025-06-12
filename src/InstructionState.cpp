@@ -1,3 +1,4 @@
+//InstructionState.cpp
 #include "InstructionState.h"
 #include <iostream> // tylko do debugowania, można usunąć
 
