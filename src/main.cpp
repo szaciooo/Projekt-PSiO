@@ -1,8 +1,8 @@
-// main.cpp
 #include <SFML/Graphics.hpp>
 #include "MenuState.h"
 #include "Game.h"
 #include "InstructionState.h"
+#include <memory>
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1536, 1024), "Forest Survival Simulator");
@@ -12,7 +12,7 @@ int main() {
     State currentState = State::MENU;
 
     MenuState menu(window);
-    Game game(window);
+    std::unique_ptr<Game> game = std::make_unique<Game>(window);
     InstructionState instruction(window);
 
     while (window.isOpen()) {
@@ -47,20 +47,22 @@ int main() {
             break;
         }
 
-        case State::GAME:
+        case State::GAME: {
             bool backToMenu = false;
-            game.handleEvents(backToMenu);
+            game->handleEvents(backToMenu);
             if (backToMenu) {
                 currentState = State::MENU;
+                game.reset();
+                game = std::make_unique<Game>(window);
                 menu.resetState();
                 break;
             }
-
-            game.update();
+            game->update();
             window.clear();
-            game.render();
+            game->render();
             window.display();
             break;
+        }
         }
     }
 

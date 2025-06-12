@@ -1,7 +1,7 @@
-// PlayerStats.cpp
 #include "PlayerStats.h"
 #include <sstream>
 
+// Konstruktor – ustawienia początkowe
 PlayerStats::PlayerStats() {
     maxHealth = 100.f;
     health = maxHealth;
@@ -23,6 +23,7 @@ PlayerStats::PlayerStats() {
     updateText();
 }
 
+// Automatyczne leczenie co klatkę
 void PlayerStats::update(float deltaTime) {
     if (health < maxHealth)
         health += regenRate * deltaTime;
@@ -32,6 +33,15 @@ void PlayerStats::update(float deltaTime) {
     updateText();
 }
 
+// Rysowanie panelu z tekstem
+void PlayerStats::render(sf::RenderWindow& window) {
+    if (showStats) {
+        window.draw(background);
+        window.draw(statsText);
+    }
+}
+
+// Odświeżenie tekstu
 void PlayerStats::updateText() {
     std::stringstream ss;
     ss << "Zdrowie: " << static_cast<int>(health)
@@ -41,19 +51,14 @@ void PlayerStats::updateText() {
     statsText.setPosition(background.getPosition().x + 10, background.getPosition().y + 10);
 }
 
-void PlayerStats::render(sf::RenderWindow& window) {
-    if (showStats) {
-        window.draw(background);
-        window.draw(statsText);
-    }
-}
-
+// Ulepszanie po każdej fali
 void PlayerStats::nextWave() {
     wave++;
     strength += 2.f;
     speed += 5.f;
 }
 
+// Leczenie i obrażenia
 void PlayerStats::heal(float amount) {
     health += amount;
     if (health > maxHealth)
@@ -65,6 +70,8 @@ void PlayerStats::takeDamage(float amount) {
     if (health < 0.f)
         health = 0.f;
 }
+
+// GETTERY
 
 float PlayerStats::getAttackStrength() const {
     return strength;
@@ -82,6 +89,7 @@ bool PlayerStats::isVisible() const {
     return showStats;
 }
 
+// Przełączanie widoczności statystyk
 void PlayerStats::toggle() {
     showStats = !showStats;
 }

@@ -1,15 +1,15 @@
-//InstructionState.cpp
 #include "InstructionState.h"
-#include <iostream> // tylko do debugowania, można usunąć
+#include <iostream> // tylko do debugowania – można usunąć
 
+// Konstruktor – ładowanie grafiki, czcionki, ustawianie tekstów
 InstructionState::InstructionState(sf::RenderWindow& window) : window(window) {
     backgroundTexture.loadFromFile("assets/backgrounds/menu_bg1.png");
     backgroundSprite.setTexture(backgroundTexture);
-    backgroundSprite.setColor(sf::Color(255, 255, 255, 150)); // lekki blur
+    backgroundSprite.setColor(sf::Color(255, 255, 255, 150)); // lekki półprzezroczysty efekt
 
     font.loadFromFile("assets/fonts/PixelFont.ttf");
 
-    // Instrukcja gry
+    // Ustawienie instrukcji sterowania
     instructions.setFont(font);
     instructions.setCharacterSize(32);
     instructions.setFillColor(sf::Color::White);
@@ -20,23 +20,25 @@ InstructionState::InstructionState(sf::RenderWindow& window) : window(window) {
         "SPACEBAR - atak"
         );
 
+    // Wyśrodkowanie tekstu
     sf::FloatRect bounds = instructions.getLocalBounds();
     instructions.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     instructions.setPosition(1536 / 2.f, 1024 / 2.f);
 
-    // Tekst X
+    // Ustawienie litery "X"
     xText.setFont(font);
     xText.setCharacterSize(32);
     xText.setString("X");
     xText.setFillColor(sf::Color::White);
     xText.setPosition(20.f, 20.f);
 
-    // Ukryty hitbox
+    // Niewidzialny prostokąt (hitbox) do kliknięcia na X
     xHitbox.setSize(sf::Vector2f(50.f, 50.f));
     xHitbox.setPosition(15.f, 15.f);
-    xHitbox.setFillColor(sf::Color(255, 255, 255, 0)); // całkowicie przezroczysty
+    xHitbox.setFillColor(sf::Color(255, 255, 255, 0)); // przezroczysty
 }
 
+// Obsługa zdarzeń: zamknięcie okna, kliknięcie X
 void InstructionState::handleEvents(bool& backToMenu) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -44,38 +46,36 @@ void InstructionState::handleEvents(bool& backToMenu) {
             window.close();
         }
         else if (event.type == sf::Event::MouseMoved) {
-            updateHover();
+            updateHover(); // podświetlanie X
         }
         else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-            updateHover(); // upewnij się, że hover działa nawet bez ruchu myszy
+            updateHover();
             if (hovered) {
-                //std::cout << "Klikniety X" << std::endl;
-                backToMenu = true;
+                backToMenu = true; // cofamy się do menu
             }
         }
     }
 }
 
+// Sprawdza czy myszka znajduje się nad X-em
 void InstructionState::updateHover() {
     auto mousePos = sf::Mouse::getPosition(window);
     if (xHitbox.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos))) {
         hovered = true;
-        xText.setFillColor(sf::Color::Yellow);
-        std::cout << "HOVERED" << std::endl;
+        xText.setFillColor(sf::Color::Yellow); // podświetlenie
     } else {
         hovered = false;
         xText.setFillColor(sf::Color::White);
     }
 }
 
+// Nie ma nic do aktualizacji
+void InstructionState::update() {}
 
-void InstructionState::update() {
-    // Brak dynamicznej logiki
-}
-
+// Rysowanie tła, instrukcji i przycisku X
 void InstructionState::render() {
     window.draw(backgroundSprite);
     window.draw(instructions);
     window.draw(xText);
-    // window.draw(xHitbox); // debug hitboxa
+    // window.draw(xHitbox); // opcjonalnie – do debugowania
 }

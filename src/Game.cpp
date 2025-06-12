@@ -4,10 +4,12 @@
 #include <algorithm>
 #include <cmath>
 
+// Konstruktor – ładowanie mapy, czcionki, start 1. fali
 Game::Game(sf::RenderWindow& window) : window(window), player() {
     if (!mapTexture.loadFromFile("assets/maps/forest_map.png")) {
         throw std::runtime_error("Nie udało się załadować mapy!");
     }
+
     mapSprite.setTexture(mapTexture);
     mapSprite.setScale(
         (float)window.getSize().x / mapTexture.getSize().x,
@@ -18,61 +20,64 @@ Game::Game(sf::RenderWindow& window) : window(window), player() {
         throw std::runtime_error("Nie udało się załadować czcionki!");
     }
 
-    // End Text
+    // Tekst końca gry
     endText.setFont(font);
-    endText.setCharacterSize(64);
+    endText.setCharacterSize(60);
     endText.setFillColor(sf::Color::White);
-    endText.setPosition(window.getSize().x / 2.f - 150.f, window.getSize().y / 2.f - 100.f);
+    endText.setStyle(sf::Text::Bold);
 
-    // X powrót
-    xText.setFont(font);
-    xText.setCharacterSize(32);
-    xText.setString("X");
-    xText.setFillColor(sf::Color::White);
-    xText.setPosition(20.f, 20.f);
+    // Tekst "X" do powrotu
+    xBackText.setFont(font);
+    xBackText.setCharacterSize(32);
+    xBackText.setFillColor(sf::Color::White);
+    xBackText.setString("X");
+    xBackText.setPosition(20.f, 20.f);
 
-    xHitbox.setSize({50.f, 50.f});
+    // Niewidoczny hitbox do kliknięcia X
+    xHitbox.setSize(sf::Vector2f(50.f, 50.f));
     xHitbox.setPosition(15.f, 15.f);
-    xHitbox.setFillColor(sf::Color(255, 255, 255, 0)); // przezroczysty
+    xHitbox.setFillColor(sf::Color(255, 255, 255, 0));
 
     spawnWave();
     lastRegenTime.restart();
 }
 
+// Obsługa zdarzeń – ruch, zamknięcie, kliknięcie X, toggle statów
 void Game::handleEvents(bool& backToMenu) {
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
         }
-        if (state == Playing) {
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::I) {
+
+        if (event.type == sf::Event::KeyPressed && !gameOver && !victory) {
+            if (event.key.code == sf::Keyboard::I) {
                 showStats = !showStats;
             }
-        } else {
-            if (event.type == sf::Event::MouseMoved) {
-                updateXHover();
-            }
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                updateXHover();
-                if (xHovered) {
-                    backToMenu = true;
-                }
+        }
+
+        if ((gameOver || victory) && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            if (xHitbox.getGlobalBounds().contains(mousePos)) {
+                backToMenu = true;
             }
         }
     }
 }
 
+// Główna logika gry – ruch, kolizje, fala, leczenie, śmierć
 void Game::update() {
-    if (state != Playing) return;
-
     float deltaTime = clock.restart().asSeconds();
+
+    if (gameOver || victory) return; // nie aktualizujemy po zakończeniu
+
     player.update(deltaTime);
 
     for (auto& enemy : skeletons) {
         enemy.update(deltaTime, player.getPosition());
     }
 
+    // Jeśli gracz atakuje – sprawdź czy trafia wrogów
     if (player.isAttacking()) {
         for (auto& enemy : skeletons) {
             if (player.getAttackBounds().intersects(enemy.getBounds())) {
@@ -81,6 +86,7 @@ void Game::update() {
         }
     }
 
+    // Jeśli wróg uderza gracza (i ma cooldown odświeżony)
     for (auto& enemy : skeletons) {
         if (enemy.getBounds().intersects(player.getBounds()) && enemy.canAttack()) {
             player.takeDamage(enemy.getAttackStrength());
@@ -88,35 +94,40 @@ void Game::update() {
         }
     }
 
+    // Usuwanie martwych wrogów i leczenie gracza
     skeletons.erase(std::remove_if(skeletons.begin(), skeletons.end(), [&](const SkeletonEnemy& e) {
                         if (e.getHealth() <= 0) {
-                            player.heal(5.f);
+                            player.heal(8.f); // więcej HP za zabójstwo
                             return true;
                         }
                         return false;
                     }), skeletons.end());
 
+    // Regeneracja życia co 3 sekundy
     if (lastRegenTime.getElapsedTime().asSeconds() > 3.f) {
         player.heal(1.f);
         lastRegenTime.restart();
     }
 
-    if (skeletons.empty()) {
-        if (wave < 10) {
-            wave++;
-            spawnWave();
-        } else {
-            state = Won;
-            endText.setString("WYGRANA");
-        }
+    // Sprawdzenie końca gry
+    if (player.getHealth() <= 0.f) {
+        gameOver = true;
+        endText.setString("PRZEGRANA");
+        endText.setPosition(window.getSize().x / 2.f - 150.f, window.getSize().y / 2.f - 100.f);
     }
 
-    if (player.getHealth() <= 0 && state == Playing) {
-        state = Lost;
-        endText.setString("PRZEGRANA");
+    // Przejście do kolejnej fali lub wygrana
+    if (skeletons.empty() && wave < 10) {
+        wave++;
+        spawnWave();
+    } else if (skeletons.empty() && wave == 10) {
+        victory = true;
+        endText.setString("WYGRANA!");
+        endText.setPosition(window.getSize().x / 2.f - 150.f, window.getSize().y / 2.f - 100.f);
     }
 }
 
+// Render – rysowanie mapy, gracza, przeciwników, pasek HP, UI, końcówka
 void Game::render() {
     window.draw(mapSprite);
     player.render(window);
@@ -129,13 +140,14 @@ void Game::render() {
     drawHealthBar(player.getPosition(), player.getHealth(), 100.f);
     drawUI();
 
-    if (state == Won || state == Lost) {
+    if (gameOver || victory) {
         window.draw(endText);
-        window.draw(xText);
-        // window.draw(xHitbox); // Debug hitboxa
+        window.draw(xBackText);
+        window.draw(xHitbox);
     }
 }
 
+// Tworzenie nowej fali przeciwników
 void Game::spawnWave() {
     int count = 3 + wave;
     skeletons.clear();
@@ -146,9 +158,8 @@ void Game::spawnWave() {
     }
 }
 
+// UI – fala, liczba wrogów, statystyki
 void Game::drawUI() {
-    if (state != Playing) return;
-
     sf::Text topLeft;
     topLeft.setFont(font);
     topLeft.setCharacterSize(28);
@@ -159,6 +170,7 @@ void Game::drawUI() {
     topLeft.setPosition(10, 10);
     window.draw(topLeft);
 
+    // Statystyki gracza po kliknięciu I
     if (showStats) {
         sf::Text stats;
         stats.setFont(font);
@@ -177,6 +189,7 @@ void Game::drawUI() {
     }
 }
 
+// Pasek zdrowia nad jednostką
 void Game::drawHealthBar(sf::Vector2f pos, float hp, float maxHp) {
     sf::RectangleShape bg(sf::Vector2f(40, 5));
     bg.setFillColor(sf::Color(50, 50, 50));
@@ -188,15 +201,4 @@ void Game::drawHealthBar(sf::Vector2f pos, float hp, float maxHp) {
 
     window.draw(bg);
     window.draw(hpBar);
-}
-
-void Game::updateXHover() {
-    auto mousePos = sf::Mouse::getPosition(window);
-    if (xHitbox.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos))) {
-        xHovered = true;
-        xText.setFillColor(sf::Color::Yellow);
-    } else {
-        xHovered = false;
-        xText.setFillColor(sf::Color::White);
-    }
 }

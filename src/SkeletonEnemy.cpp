@@ -1,4 +1,3 @@
-// SkeletonEnemy.cpp
 #include "SkeletonEnemy.h"
 #include <cmath>
 
@@ -6,7 +5,6 @@ SkeletonEnemy::SkeletonEnemy(sf::Vector2f pos, float atk) : position(pos), attac
     walkTexture.loadFromFile("assets/player/BODY_skeleton.png");
     attackTexture.loadFromFile("assets/player/BODY_skeleton_attack.png");
     deathTexture.loadFromFile("assets/player/BODY_skeleton_hurt.png");
-    hoodTexture.loadFromFile("assets/player/HEAD_chain_armor_hood.png");
     weaponTexture.loadFromFile("assets/player/WEAPON_dagger.png");
 
     sprite.setTexture(walkTexture);
@@ -15,7 +13,7 @@ SkeletonEnemy::SkeletonEnemy(sf::Vector2f pos, float atk) : position(pos), attac
 }
 
 void SkeletonEnemy::update(float deltaTime, sf::Vector2f playerPos) {
-    sf::Vector2f direction = playerPos - position;
+    direction = playerPos - position;
     float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     if (length != 0) direction /= length;
 
@@ -58,5 +56,18 @@ void SkeletonEnemy::resetAttackCooldown() {
 }
 
 void SkeletonEnemy::updateAnimation() {
-    // tu możesz rozbudować animację później
+    if (animationClock.getElapsedTime().asSeconds() > 0.2f) {
+        currentFrame = (currentFrame + 1) % 4;
+        animationClock.restart();
+    }
+
+    int row = 0;
+    if (std::abs(direction.y) > std::abs(direction.x)) {
+        row = (direction.y > 0) ? 0 : 3; // Down : Up
+    } else {
+        row = (direction.x > 0) ? 2 : 1; // Right : Left
+    }
+
+    sprite.setTexture(walkTexture);
+    sprite.setTextureRect(sf::IntRect(currentFrame * 64, row * 64, 64, 64));
 }
